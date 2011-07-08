@@ -19,7 +19,7 @@ float global_dynamic = 80;
 float global_tempo = 110;
 
 void setup() {
-  noLoop();
+  //noLoop();
   size( 220, 120, P2D );
   arduino = new Arduino(this, Arduino.list()[0], 57600);
   arduino.pinMode(SWITCH_PIN, Arduino.INPUT);
@@ -38,11 +38,12 @@ void draw() {
   background(color(4, 79, 111));
   // draw using a white stroke
   stroke(color(84, 145, 158));
-  /*
+ 
   int left_val = arduino.analogRead(LEFT_FORCE_SENSOR_PIN);
   int right_val = arduino.analogRead(RIGHT_FORCE_SENSOR_PIN);
-  int swith_val = arduino.digitalRead(SWITCH_PIN);
-  */
+  int switch_val = arduino.digitalRead(SWITCH_PIN);
+  
+  println(left_val + ": " + right_val + ": " + switch_val);
 }
 
 void handleCallbacks(int callbackID) {
