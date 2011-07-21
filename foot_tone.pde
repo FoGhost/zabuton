@@ -33,4 +33,28 @@ class FootTone extends Tone {
       beat_count += duration;
     }
   }
+    
+  void playSerialNotes() {
+    if(playable) {
+      serializeNotes();
+      score.addCallback(4, 11);
+      score.play();
+    }
+  }
+  
+  void serializeNotes() {
+    score.empty();
+    for (float i=0; i<16; i++) {
+      if (i%8 == 0 || i%16 == 14) {
+        score.addNote(i/4, 9, 0, 36, 100, 0.25, 0.8, 64);
+      } else if (random(10) < 1) score.addNote(i/4, 9, 0, 36, 70, 0.25, 0.8, 64);
+      if (i%8 == 4) {
+        score.addNote(i/4, 9, 0, 38, 100, 0.25, 0.8, 64);
+      } else if (random(10) < 2) score.addNote(i/4, 9, 0, 38, 60, 0.25, 0.8, 64);
+      if (random(10) < 8) {
+        score.addNote(i/4, 9, 0, 42, random(40) + 70, 0.25, 0.8, 64);
+      } else score.addNote(i/4, 9, 0, 46, 80, 0.25, 0.8, 64);
+    }
+
+  }
 }

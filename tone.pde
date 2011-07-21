@@ -13,7 +13,8 @@ class Tone {
   float articulation = 0.8;
   float pan = 0;
   SoundCipher sound_cipher;
-
+  SCScore score;
+  
   Tone() {
     sound_cipher = new SoundCipher();
   }
@@ -21,6 +22,12 @@ class Tone {
   Tone(float pt) {
     setPitch(pt);
     sound_cipher = new SoundCipher();
+  }
+  
+  Tone(float pt, SCScore sc) {
+    setPitch(pt);
+    sound_cipher = new SoundCipher();
+    score = sc;
   }
   
   Tone(float pt, float dt, float dm) {
@@ -55,7 +62,9 @@ class Tone {
   }
   
   void play() {
+    //TODO if initialized score? 
     sound_cipher.playNote(starBeat, channel, instrument, pitch, dynamic, duration, articulation, pan);
     beat_count += duration;
   }
+
 }
