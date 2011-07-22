@@ -6,39 +6,50 @@ class CymbalTone extends ZabuTone {
     super(pt, score);
   }
   
+  CymbalTone(float pt, SCScore score, Arduino ard) {
+    super(pt, score, ard);
+  }
+  
   CymbalTone(float dt, float dm, float pt, SCScore score) {
     super(dt, dm, pt, score);
   }
   
   void dynamicGenNotes() {
-    println(dynamic +" : duration: " + duration);
-    //float i = 0;
-    //while(i< (4/duration)) {
-      
-    score.addNote(0, 9, 0, pitch, dynamic+20, duration, 0.8, 64);
-    score.addNote(0, 9, 0, pitch, dynamic+20, duration, 0.8, 64);  
-    //}
-    for (float i=0; i< (4/duration) ; i++) {/*
-      if (i%8 == 0 || i%16 == 14) {
-        score.addNote(i/4, 9, 0, pitch, dynamic + 30, duration, 0.8, 64);
-      } else if (random(10) < 1) {
-        score.addNote(i/4, 9, 0, pitch, dynamic + 10, duration, 0.8, 64);
+    if (rhythm_level == 0) {
+      for (float i=0; i< 16 ; i++) {
+        // Simple one
+        if (i%4 == 0) {
+          float rd = random(10);
+          if (rd < 7) {
+            score.addNote(i * 0.5, 9, 0, pitch, 20, 0.25, 0.1, 64);
+          } else if(rd< 9) {
+            score.addNote(i * 0.5, 9, 0, pitch, 10, 0.25, 0.1, 64);
+          } else {
+             score.addNote(i * 0.5, 9, 0, pitch, 40, 0.25, 0.1, 64);
+          }
+        } else {
+          //score.addNote(i * 0.5, 9, 0, pitch, 30, 0.5, 0.8, 64);
+        }
       }
-      if (i%8 == 4) {
-        score.addNote(i/4, 9, 0, pitch, dynamic + 30, duration, 0.8, 64);
-      } else if (random(10) < 2) {
-        score.addNote(i/4, 9, 0, pitch, dynamic, duration, 0.8, 64);
-      }*/
-      
-      // simple
-      if (i%2 ==0) {
-        score.addNote(i * duration, 9, 0, pitch, dynamic+20, duration, 0.8, 64);
-      }
-      
-      if (random(10) < 5) {
-        //score.addNote(i * duration, 9, 0, pitch, dynamic+20, duration, 0.8, 64);
-      } else {
-        //score.addNote(i * duration, 9, 0, pitch, dynamic + 40 , duration, 0.8, 64);
+    } else  if (rhythm_level == 1) {
+      for (float i=0; i< 16; i++) {
+        if (i%8 == 0 || i%16 == 14) {
+          score.addNote(i * 0.5, 9, 0, pitch, 40, 0.25, 0.8, 64);
+        } else if (random(10) < 1) {
+          score.addNote(i * 0.5, 9, 0, pitch, 5, 0.25, 0.8, 64);
+        }
+        
+        if (i%8 == 4) {
+          score.addNote(i * 0.5, 9, 0, pitch, 30, 0.25, 0.8, 64);
+        } else if (random(10) < 2) {
+          score.addNote(i * 0.5, 9, 0, pitch, 15, 0.25, 0.8, 64);
+        }
+        
+        if (random(10) < 8) {
+          score.addNote(i * 0.5, 9, 0, pitch, random(5) + 20, 0.25, 0.8, 64);
+        } else {
+          score.addNote(i * 0.5, 9, 0, pitch, 15 , duration, 0.25, 64);
+        }
       }
     }
   }

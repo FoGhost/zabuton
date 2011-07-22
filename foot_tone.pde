@@ -3,6 +3,9 @@ import arb.soundcipher.constants.*;
 
 class FootTone extends Tone {
   boolean playable = true;
+  Arduino arduino;
+  int led_pin = 10;
+  int led_val = 0;
   
   FootTone() {
     super();
@@ -12,9 +15,28 @@ class FootTone extends Tone {
     super(pt);
   }
   
+  FootTone(float pt, int led, Arduino ard) {
+    super(pt);
+    led_pin = led;
+    arduino = ard;
+  }
+  
   FootTone(float pt, float dt, float dm) {
     super(pt, dt, dm);
   }
+  
+  void lightOn() {
+    arduino.analogWrite(led_pin, led_val);
+  }
+  
+  void lightOff() {
+    arduino.analogWrite(led_pin, led_val); 
+  }
+  
+  void boot() {
+    
+  }
+  
   void lock() {
     playable = false;
   }
@@ -23,8 +45,9 @@ class FootTone extends Tone {
     playable = true;
   }
   
-  void dynamic_update(float val) {
-    
+  void update(float val) {
+    setDynamic(val);
+    led_val = int(map(val, 0, 500, 0, 255));
   }
   
   void play() {

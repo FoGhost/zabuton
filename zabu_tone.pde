@@ -4,6 +4,10 @@ import arb.soundcipher.constants.*;
 class ZabuTone extends Tone {
   Arduino arduino;
   boolean playing = false;
+  final int LED_PIN = 9;
+  
+  int rhythm_level = 0;
+  
   ZabuTone() {
     super();
   }
@@ -16,7 +20,12 @@ class ZabuTone extends Tone {
   ZabuTone(float pt, SCScore score) {
     super(pt, score);
   }
-     
+  
+  ZabuTone(float pt, SCScore score, Arduino ard) {
+    super(pt, score);
+    arduino = ard;
+  }
+  
   ZabuTone(float pt, float dt, float dm, Arduino ard) {
     super(pt, dt, dm);
   }
@@ -29,6 +38,14 @@ class ZabuTone extends Tone {
   
   void setPlaying(boolean signal) {
     playing = signal;
+  }
+  
+  void setRhythmLevel(int level) {
+    rhythm_level = level;
+  }
+  
+  int getRhythmLevel(int level) {
+    return rhythm_level;
   }
   
   void dynamicUpdate() {
@@ -54,6 +71,17 @@ class ZabuTone extends Tone {
     }
   }
   
+  void lightOn() {
+    arduino.analogWrite(LED_PIN, 255);
+  }
+  
+  void lightOff() {
+    arduino.analogWrite(LED_PIN, 0); 
+  }
+  
+  void boot() {
+    
+  }
   /*
   void dynamicGenNotes() {
      for (float i=0; i<8; i++) {
@@ -69,6 +97,4 @@ class ZabuTone extends Tone {
     }
   }*/
 
-  void light_on(int pin) {
-  }
 }

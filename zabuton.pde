@@ -14,6 +14,7 @@ ZabuTone zabu_tone1;
 ZabuTone zabu_tone2;
 ZabuTone zabu_tone3;
 TomTone tom_tone;
+CongaTone conga_tone;
 CabasaTone cabasa_tone;
 HiHatTone hi_hat_tone;
 CymbalTone cymbal_tone;
@@ -22,14 +23,24 @@ CymbalTone cymbal_tone;
 final int RIGHT_FORCE_SENSOR_PIN = 0;
 final int LEFT_FORCE_SENSOR_PIN = 1;
 final int SWITCH_PIN = 12;
-final int LED_PIN_1 = 9;
+final int LED_PIN = 9;
 
 float force_sensor_max_threshold = 400;
+float force_sensor_min_threshold = 20;
 float foot_tone_volume_min_threshold = 40;
 float duration = 0.5;
 float dynamic = 80;
 float tempo = 110;
 boolean play_signal = true;
+boolean playing = false;
+
+boolean[][] button_status = {{true, true, true, true}, {false, false, false, false}};
+final int RECT_UPPERLEFT_X = 30;
+final int RECT_UPPERLEFT_Y = 30;
+final int RECT_LENGTH = 30;
+final int RECT_INTERVAL = 10;
+final color OFF = color(4, 79, 111);
+final color ON = color(84, 145, 158);
 
 void setup() {
   //noLoop();
@@ -37,7 +48,7 @@ void setup() {
   
   arduino = new Arduino(this, Arduino.list()[0], 57600);
   arduino.pinMode(SWITCH_PIN, Arduino.INPUT);
-  arduino.pinMode(LED_PIN_1, Arduino.OUTPUT);
+  arduino.pinMode(LED_PIN, Arduino.OUTPUT);
 
   score = new SCScore();
   score.addCallbackListener(this);
@@ -53,13 +64,27 @@ void setup() {
   zabu_tone1 = new ZabuTone(score.LOW_FLOOR_TOM);
   */
   
+  /*
   left_foot_tone = new FootTone(score.TAMBOURINE);
   right_foot_tone = new FootTone(score.LOW_WOOD_BLOCK);
-  zabu_tone1 = new ZabuTone(score.LOW_CONGA, score);
-  tom_tone = new TomTone(0.5, 40, score.LOW_TOM, score);
-  cabasa_tone = new CabasaTone(0.5, 10, score.CABASA, score);
-  hi_hat_tone = new HiHatTone(0.5, 10, score.HIHAT, score);
-  cymbal_tone = new CymbalTone(0.5, 10, score.CRASH_CYMBAL_2, score);
+  */
+  
+  left_foot_tone = new FootTone(score.ELECTRIC_SNARE);
+  right_foot_tone = new FootTone(score.LOW_WOOD_BLOCK);
+  
+  tom_tone = new TomTone(score.LOW_TOM, score);
+  
+  //test conga tone
+  conga_tone = new CongaTone(score.LOW_CONGA, score);
+  cabasa_tone = new CabasaTone(score.CABASA, score);
+  hi_hat_tone = new HiHatTone(score.HIHAT, score);
+  cymbal_tone = new CymbalTone(score.CRASH, score);
+  
+  conga_tone.dynamicGenNotes();
+  //cabasa_tone.dynamicGenNotes();  
+  //cymbal_tone.dynamicGenNotes();
+  
+  score.addCallback(8, 0);
   /*
   left_foot_tone = new FootTone(score.VIBRASLAP);
   right_foot_tone = new FootTone(score.TRIANGLE);
@@ -85,79 +110,140 @@ void draw() {
   int left_val = arduino.analogRead(LEFT_FORCE_SENSOR_PIN);
   int right_val = arduino.analogRead(RIGHT_FORCE_SENSOR_PIN);
   int switch_val = arduino.digitalRead(SWITCH_PIN);
-
+  
+  switch_val = 1;
   if (switch_val== 1) {
-    zabu_tone1.play();
+    //zabu_tone1.play();
+    if(playing == false) {
+      score.play();
+      playing = true;
+    }
     /*
     zabu_tone2.play();
     zabu_tone3.play();
     */
-    
     //LED testing
     int light;
     if (random(10) > 11) {
-      arduino.analogWrite(LED_PIN_1, 100); 
+      arduino.analogWrite(LED_PIN, 100); 
     } else {
-      arduino.analogWrite(LED_PIN_1, 255);
+      arduino.analogWrite(LED_PIN, 255);
     }
+    
     //END LED testing
     
   } else {
+    score.stop();
+    score.empty();
+    playing = false;
     //LED testing
-    arduino.analogWrite(LED_PIN_1, 0);
+    arduino.analogWrite(LED_PIN, 0);
     //END LED testing
   }
-  if ( left_val > 0) {
-      left_foot_tone.setDynamic(forceToDynamic(left_val));
+  
+  if (left_val > force_sensor_min_threshold) {
+      left_foot_tone.update(forceToDynamic(left_val));
       left_foot_tone.play();
       left_foot_tone.lock();
   } else {
     left_foot_tone.unlock();
   }
   
-  if (right_val > 0) {
-    right_foot_tone.setDynamic(forceToDynamic(right_val));
+  if (right_val > force_sensor_min_threshold) {
+    right_foot_tone.update(forceToDynamic(right_val));
     right_foot_tone.play();
     right_foot_tone.lock();
   } else {
+    right_foot_tone.update(0);
     right_foot_tone.unlock();
   }
+  println(left_val + ": " + right_val + ": " + switch_val + "playing: " + playing);
   
-  //println(left_val + ": " + right_val + ": " + switch_val);
+  //Buttons for controlling
+  for (int i = 0; i < 2 ; i++) {
+    for (int j = 0; j < 4; j++) {
+      if (button_status[i][j] == false) {
+        fill(OFF);
+      } else {
+        fill(ON);
+      }
+      rect(RECT_UPPERLEFT_X + j * (RECT_LENGTH+RECT_INTERVAL), RECT_UPPERLEFT_Y + i * (RECT_LENGTH+RECT_INTERVAL), RECT_LENGTH, RECT_LENGTH);
+    }
+  }
+  
+  
 }
 
 float forceToDynamic(int force) {
-  return map(force, 0, force_sensor_max_threshold, foot_tone_volume_min_threshold, 120);
+  return map(force, force_sensor_min_threshold, force_sensor_max_threshold, foot_tone_volume_min_threshold, 120);
 }
 
 void handleCallbacks(int callbackID) {
   //zabu_tone1.dynamicUpdate();
   score.stop();
   score.empty();
-  //tom_tone.dynamicGenNotes();
-  cymbal_tone.dynamicGenNotes();
-  score.addCallback(4, 0);
-  score.play();
+  conga_tone.dynamicGenNotes();
+  //cabasa_tone.dynamicGenNotes();  
+  //cymbal_tone.dynamicGenNotes();
+  score.addCallback(8, 0);
+  playing = false;
+  //score.play();
   //zabu_tone1.dynamicGenNotes();
-
+  /*
   switch (callbackID) {
     case 11:
       left_foot_tone.score.stop();
   }
-  
-  score.addCallback(4, 0);
+  */
   //score.update();
 }
+
+void mousePressed() {
+  int x_pos = -1, y_pos = -1;
+  if (RECT_UPPERLEFT_Y < mouseY && mouseY < RECT_UPPERLEFT_Y+ 2 * RECT_LENGTH + RECT_INTERVAL) {
+    x_pos = (mouseX - RECT_UPPERLEFT_X) / (RECT_LENGTH + RECT_INTERVAL);
+    
+    if (mouseY < RECT_UPPERLEFT_Y+ RECT_LENGTH + RECT_INTERVAL) {
+      y_pos = 0;
+    } else {
+      y_pos = 1;
+    }
+  }
+  
+  if (x_pos < 4 && y_pos < 2) {
+   if (y_pos == 1) {
+    button_status[y_pos][x_pos] = true;
+    button_status[0][x_pos] = false;
+   } else if(y_pos == 0) {
+    button_status[y_pos][x_pos] = true;
+    button_status[1][x_pos] = false;
+   }
+  }
+  
+  switch (x_pos) {
+    case 0:
+      conga_tone.setRhythmLevel(y_pos);
+      break;
+    case 1:
+      cabasa_tone.setRhythmLevel(y_pos);
+      break;
+    case 2:
+      cymbal_tone.setRhythmLevel(y_pos);
+      break;
+    case 3:
+      break;
+  }
+}
+
 void keyPressed() {
    if (key == 'c') {
-      score.stop();
-      score.empty();
-     //tom_tone.dynamicGenNotes();
+     score.stop();
+     score.empty();
+     conga_tone.dynamicGenNotes();
      //cabasa_tone.dynamicGenNotes();
-     cymbal_tone.dynamicGenNotes();
+     //cymbal_tone.dynamicGenNotes();
      //hi_hat_tone.dynamicGenNotes();
-     //zabu_tone1.dynamicGenNotes();
-     score.addCallback(4, 0);
+     score.addCallback(8, 0);
      score.play();
      //zabu_tone1.play();
    }
