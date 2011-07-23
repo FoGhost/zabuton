@@ -5,8 +5,11 @@ class ZabuTone extends Tone {
   Arduino arduino;
   boolean playing = false;
   final int LED_PIN = 9;
-  
+  final int SWITCH_PIN = 12;
+  boolean is_booted = false;
+  boolean started_booting = false;
   int rhythm_level = 0;
+  Timer timer;
   
   ZabuTone() {
     super();
@@ -48,27 +51,62 @@ class ZabuTone extends Tone {
     return rhythm_level;
   }
   
-  void dynamicUpdate() {
-    if (beat_count%4 == 0 || random(10) < 2) {
-      duration = 1;
+  boolean isOn() {
+    int val = arduino.digitalRead(SWITCH_PIN);
+    if (val == 0) {
+      return false;
     } else {
-      duration = 0.5;
+      return true;
     }
-    dynamic = cos(PI * 1 * beat_count) * 30 + 90;
-    playing = false;
   }
   
-  void play() {
-    if (!playing) {
-      float[] pitches = {sound_cipher.LOW_CONGA, sound_cipher.LOW_CONGA, sound_cipher.LOW_CONGA};
-      //float[] pitches = {70, 75, 72};
-      //float [] dynamics = {80, 100, 80};
-      //float[] durations = {0.5, 1, 0.5};
-      sound_cipher.playNote(starBeat, channel, instrument, pitch, dynamic, duration, articulation, pan);
-      //sound_cipher.playChord(starBeat, channel, instrument, pitches, dynamic, duration, articulation, pan);
-      beat_count += duration;
-      playing =  true;
+  boolean isBooted() {
+    if (is_booted == true) {
+      return true;
+    } else {
+      return false;
     }
+  }
+  
+  boolean isBooting() {
+    if (timer.isFinished()) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+  
+  void completeBooting() {
+    is_booted = true;
+    //lightOff();
+  }
+  
+  void boot(FootTone left_tone, FootTone right_tone) {
+    if (started_booting == false) {
+      lightOn();
+      timer = new Timer(3000);
+      timer.start();
+      started_booting = true;
+    } else if (isBooting()) {
+      lightOn();
+      left_tone.setLedVal(255);
+      left_tone.lightOn();
+      right_tone.setLedVal(255);
+      right_tone.lightOn();
+      delay(500);
+      lightOff();
+      left_tone.lightOff();
+      right_tone.lightOff();
+      delay(500);
+    } else {
+      completeBooting();
+      started_booting = false;
+    }
+  }
+  
+  void shutdown() {
+    lightOff();
+    is_booted = false;
   }
   
   void lightOn() {
@@ -78,23 +116,4 @@ class ZabuTone extends Tone {
   void lightOff() {
     arduino.analogWrite(LED_PIN, 0); 
   }
-  
-  void boot() {
-    
-  }
-  /*
-  void dynamicGenNotes() {
-     for (float i=0; i<8; i++) {
-      if (i%8 == 0 || i%16 == 14) {
-        score.addNote(i/4, 9, 0, pitch, 100, 0.5, 0.8, 64);
-      } else if (random(10) < 1) score.addNote(i/4, 9, 0, pitch, 70, 0.5, 0.8, 64);
-      if (i%8 == 4) {
-        score.addNote(i/4, 9, 0, pitch, 100, 0.25, 0.8, 64);
-      } else if (random(10) < 2) score.addNote(i/4, 9, 0, pitch, 60, 0.5, 0.8, 64);
-      if (random(10) < 8) {
-        score.addNote(i/4, 9, 0, pitch, random(40) + 70, 0.5, 0.8, 64);
-      } else score.addNote(i/4, 9, 0, pitch, 80, 0.5, 0.8, 64);
-    }
-  }*/
-
 }

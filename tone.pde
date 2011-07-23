@@ -66,5 +66,4 @@ class Tone {
     sound_cipher.playNote(starBeat, channel, instrument, pitch, dynamic, duration, articulation, pan);
     beat_count += duration;
   }
-
 }

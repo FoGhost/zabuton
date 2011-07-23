@@ -69,22 +69,20 @@ void setup() {
   right_foot_tone = new FootTone(score.LOW_WOOD_BLOCK);
   */
   
-  left_foot_tone = new FootTone(score.ELECTRIC_SNARE);
-  right_foot_tone = new FootTone(score.LOW_WOOD_BLOCK);
+  left_foot_tone = new FootTone(score.ELECTRIC_SNARE, 10, arduino);
+  right_foot_tone = new FootTone(score.KICK_DRUM, 11, arduino);
   
-  tom_tone = new TomTone(score.LOW_TOM, score);
+  //Initialized tone
+  tom_tone = new TomTone(score.LOW_TOM, score, arduino);
+  conga_tone = new CongaTone(score.LOW_CONGA, score, arduino);
+  cabasa_tone = new CabasaTone(score.CABASA, score, arduino);
+  hi_hat_tone = new HiHatTone(score.HIHAT, score, arduino);
+  cymbal_tone = new CymbalTone(score.CRASH, score, arduino);
   
-  //test conga tone
-  conga_tone = new CongaTone(score.LOW_CONGA, score);
-  cabasa_tone = new CabasaTone(score.CABASA, score);
-  hi_hat_tone = new HiHatTone(score.HIHAT, score);
-  cymbal_tone = new CymbalTone(score.CRASH, score);
-  
-  conga_tone.dynamicGenNotes();
+  //conga_tone.dynamicGenNotes();
   //cabasa_tone.dynamicGenNotes();  
   //cymbal_tone.dynamicGenNotes();
-  
-  score.addCallback(8, 0);
+
   /*
   left_foot_tone = new FootTone(score.VIBRASLAP);
   right_foot_tone = new FootTone(score.TRIANGLE);
@@ -109,55 +107,58 @@ void draw() {
  
   int left_val = arduino.analogRead(LEFT_FORCE_SENSOR_PIN);
   int right_val = arduino.analogRead(RIGHT_FORCE_SENSOR_PIN);
-  int switch_val = arduino.digitalRead(SWITCH_PIN);
   
-  switch_val = 1;
-  if (switch_val== 1) {
-    //zabu_tone1.play();
-    if(playing == false) {
-      score.play();
-      playing = true;
-    }
-    /*
-    zabu_tone2.play();
-    zabu_tone3.play();
-    */
-    //LED testing
-    int light;
-    if (random(10) > 11) {
-      arduino.analogWrite(LED_PIN, 100); 
+  //conga_tone.isOn()
+  if (conga_tone.isOn()) {
+    if (!conga_tone.isBooted()) {
+    //Status: Sleeping
+      //TODO dhynammic add instrument in callback
+      if (playing == false) {
+        conga_tone.dynamicGenNotes();
+        score.addCallback(8, 0);
+        score.play();
+        playing = true;
+      }
+      conga_tone.boot(left_foot_tone, right_foot_tone);
     } else {
-      arduino.analogWrite(LED_PIN, 255);
+    //Status: Booted
+      if (playing == false) {
+        score.play();
+        playing = true;
+      }
+      conga_tone.lightOn();
     }
-    
-    //END LED testing
-    
   } else {
+    if (conga_tone.isBooted()) {
+      conga_tone.shutdown();
+    }
     score.stop();
     score.empty();
     playing = false;
-    //LED testing
-    arduino.analogWrite(LED_PIN, 0);
-    //END LED testing
   }
-  
+
   if (left_val > force_sensor_min_threshold) {
       left_foot_tone.update(forceToDynamic(left_val));
       left_foot_tone.play();
+      left_foot_tone.lightOn();
       left_foot_tone.lock();
   } else {
+    left_foot_tone.update(0);
+    left_foot_tone.lightOff();
     left_foot_tone.unlock();
   }
   
   if (right_val > force_sensor_min_threshold) {
     right_foot_tone.update(forceToDynamic(right_val));
     right_foot_tone.play();
+    right_foot_tone.lightOn();
     right_foot_tone.lock();
   } else {
     right_foot_tone.update(0);
+    right_foot_tone.lightOff();
     right_foot_tone.unlock();
   }
-  println(left_val + ": " + right_val + ": " + switch_val + "playing: " + playing);
+  println(left_val + ": " + right_val + ": " + conga_tone.isOn() + " is_booted: " + conga_tone.isBooted());
   
   //Buttons for controlling
   for (int i = 0; i < 2 ; i++) {
@@ -170,8 +171,6 @@ void draw() {
       rect(RECT_UPPERLEFT_X + j * (RECT_LENGTH+RECT_INTERVAL), RECT_UPPERLEFT_Y + i * (RECT_LENGTH+RECT_INTERVAL), RECT_LENGTH, RECT_LENGTH);
     }
   }
-  
-  
 }
 
 float forceToDynamic(int force) {
@@ -179,12 +178,13 @@ float forceToDynamic(int force) {
 }
 
 void handleCallbacks(int callbackID) {
-  //zabu_tone1.dynamicUpdate();
+  println("callback");
   score.stop();
   score.empty();
   conga_tone.dynamicGenNotes();
-  //cabasa_tone.dynamicGenNotes();  
+  cabasa_tone.dynamicGenNotes();  
   //cymbal_tone.dynamicGenNotes();
+  
   score.addCallback(8, 0);
   playing = false;
   //score.play();

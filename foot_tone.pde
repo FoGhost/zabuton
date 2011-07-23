@@ -5,6 +5,8 @@ class FootTone extends Tone {
   boolean playable = true;
   Arduino arduino;
   int led_pin = 10;
+  int force_pin = 0;
+  
   int led_val = 0;
   
   FootTone() {
@@ -30,19 +32,27 @@ class FootTone extends Tone {
   }
   
   void lightOff() {
-    arduino.analogWrite(led_pin, led_val); 
+    arduino.analogWrite(led_pin, 0); 
   }
   
   void boot() {
     
   }
   
+  int getForeceVal() {
+   return arduino.analogRead(force_pin);
+  }
+
   void lock() {
     playable = false;
   }
   
   void unlock() {
     playable = true;
+  }
+  
+  void setLedVal(int val) {
+    led_val = val;
   }
   
   void update(float val) {
@@ -78,6 +88,5 @@ class FootTone extends Tone {
         score.addNote(i/4, 9, 0, 42, random(40) + 70, 0.25, 0.8, 64);
       } else score.addNote(i/4, 9, 0, 46, 80, 0.25, 0.8, 64);
     }
-
   }
 }

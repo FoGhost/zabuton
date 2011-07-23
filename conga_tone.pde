@@ -15,16 +15,16 @@ class CongaTone extends ZabuTone {
   }
   
   void dynamicGenNotes() {
-    
+    println("here");
     //Simple One
     if (rhythm_level == 0) {
       for (float i=0; i< 16; i++) {
         if (i%8 < 2) {
-          score.addNote(i * 0.5, 9, 0, pitch, 20, 0.25, 0.8, 64);
+          score.addNote(i * 0.5, 9, 0, pitch, 70, 0.25, 0.8, 64);
         } else if (i%8 < 4) {
-          score.addNote(i * 0.5, 9, 0, pitch, 5, 0.25, 0.8, 64);
+          score.addNote(i * 0.5, 9, 0, pitch, 35, 0.25, 0.8, 64);
         } else if (i%8 < 7) {
-          score.addNote(i * 0.5, 9, 0, pitch, 60, 0.25, 0.8, 64);
+          score.addNote(i * 0.5, 9, 0, pitch, 110, 0.25, 0.8, 64);
         }
       }
     } else  if (rhythm_level == 1) {
