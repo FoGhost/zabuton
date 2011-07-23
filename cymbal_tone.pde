@@ -16,21 +16,34 @@ class CymbalTone extends ZabuTone {
   
   void dynamicGenNotes() {
     if (rhythm_level == 0) {
+      for (float i=0; i< 16; i++) {
+        if (i%9 == 0 || i%15 == 0) {
+          score.addNote(i * 0.5, 9, 0, pitch, 100, 0.5, 0.8, 64);
+        } else if (i%4 !=0) {
+          float rd = random(10);
+          if (i%3 == 0) {
+           score.addNote(i * 0.5, 9, 0, pitch, 70, 0.25, 0.8, 64);
+          } else {
+           score.addNote(i * 0.5, 9, 0, pitch, 30, 0.25, 0.8, 64);
+          }
+        }
+      }
+      /*
       for (float i=0; i< 16 ; i++) {
         // Simple one
         if (i%4 == 0) {
           float rd = random(10);
           if (rd < 7) {
-            score.addNote(i * 0.5, 9, 0, pitch, 20, 0.25, 0.1, 64);
+            score.addNote(i * 0.5, 9, 0, pitch, 60, 0.25, 0.1, 64);
           } else if(rd< 9) {
-            score.addNote(i * 0.5, 9, 0, pitch, 10, 0.25, 0.1, 64);
+            score.addNote(i * 0.5, 9, 0, pitch, 20, 0.25, 0.1, 64);
           } else {
-             score.addNote(i * 0.5, 9, 0, pitch, 40, 0.25, 0.1, 64);
+             score.addNote(i * 0.5, 9, 0, pitch, 80, 0.25, 0.1, 64);
           }
         } else {
           //score.addNote(i * 0.5, 9, 0, pitch, 30, 0.5, 0.8, 64);
         }
-      }
+      }*/
     } else  if (rhythm_level == 1) {
       for (float i=0; i< 16; i++) {
         if (i%8 == 0 || i%16 == 14) {

@@ -15,7 +15,6 @@ class CongaTone extends ZabuTone {
   }
   
   void dynamicGenNotes() {
-    println("here");
     //Simple One
     if (rhythm_level == 0) {
       for (float i=0; i< 16; i++) {

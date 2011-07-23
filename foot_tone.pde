@@ -17,9 +17,10 @@ class FootTone extends Tone {
     super(pt);
   }
   
-  FootTone(float pt, int led, Arduino ard) {
+  FootTone(float pt, int led, int fc_pin, Arduino ard) {
     super(pt);
     led_pin = led;
+    force_pin = fc_pin;
     arduino = ard;
   }
   

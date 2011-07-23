@@ -5,19 +5,23 @@ import cc.arduino.*;
 import arb.soundcipher.*;
 import arb.soundcipher.constants.*;
 
-Arduino arduino;
+Arduino conga_arduino;
+Arduino cymbal_arduino;
 
 SCScore score;
-FootTone left_foot_tone;
-FootTone right_foot_tone;
+
 ZabuTone zabu_tone1;
 ZabuTone zabu_tone2;
 ZabuTone zabu_tone3;
 TomTone tom_tone;
 CongaTone conga_tone;
+FootTone conga_left_tone;
+FootTone conga_right_tone;
 CabasaTone cabasa_tone;
 HiHatTone hi_hat_tone;
 CymbalTone cymbal_tone;
+FootTone cymbal_left_tone;
+FootTone cymbal_right_tone;
 
 //define pin value here
 final int RIGHT_FORCE_SENSOR_PIN = 0;
@@ -25,7 +29,7 @@ final int LEFT_FORCE_SENSOR_PIN = 1;
 final int SWITCH_PIN = 12;
 final int LED_PIN = 9;
 
-float force_sensor_max_threshold = 400;
+float force_sensor_max_threshold = 800;
 float force_sensor_min_threshold = 20;
 float foot_tone_volume_min_threshold = 40;
 float duration = 0.5;
@@ -46,10 +50,18 @@ void setup() {
   //noLoop();
   size( 220, 120, P2D);
   
-  arduino = new Arduino(this, Arduino.list()[0], 57600);
-  arduino.pinMode(SWITCH_PIN, Arduino.INPUT);
-  arduino.pinMode(LED_PIN, Arduino.OUTPUT);
-
+  conga_arduino = new Arduino(this, Arduino.list()[0], 57600);
+  conga_arduino.pinMode(SWITCH_PIN, Arduino.INPUT);
+  conga_arduino.pinMode(LED_PIN, Arduino.OUTPUT);
+  
+  cymbal_arduino = new Arduino(this, Arduino.list()[2], 57600);
+  cymbal_arduino.pinMode(SWITCH_PIN, Arduino.INPUT);
+  cymbal_arduino.pinMode(LED_PIN, Arduino.OUTPUT);
+  
+  /*
+  cymbal_arduino.pinMode(SWITCH_PIN, Arduino.INPUT);
+  cymbal_arduino.pinMode(LED_PIN, Arduino.OUTPUT);
+  */
   score = new SCScore();
   score.addCallbackListener(this);
   score.tempo(110.0);
@@ -69,15 +81,20 @@ void setup() {
   right_foot_tone = new FootTone(score.LOW_WOOD_BLOCK);
   */
   
-  left_foot_tone = new FootTone(score.ELECTRIC_SNARE, 10, arduino);
-  right_foot_tone = new FootTone(score.KICK_DRUM, 11, arduino);
+  //Initialized tone sets
+  conga_tone = new CongaTone(score.HIGH_TOM, score, conga_arduino);
+  conga_left_tone = new FootTone(score.ACOUSTIC_SNARE, 10, 0, conga_arduino);
+  conga_right_tone = new FootTone(score.CRASH, 11, 1, conga_arduino);
   
-  //Initialized tone
-  tom_tone = new TomTone(score.LOW_TOM, score, arduino);
-  conga_tone = new CongaTone(score.LOW_CONGA, score, arduino);
-  cabasa_tone = new CabasaTone(score.CABASA, score, arduino);
-  hi_hat_tone = new HiHatTone(score.HIHAT, score, arduino);
-  cymbal_tone = new CymbalTone(score.CRASH, score, arduino);
+  cymbal_tone = new CymbalTone(score.CABASA, score, cymbal_arduino);
+  cymbal_left_tone = new FootTone(score.LOW_CONGA, 10, 0, cymbal_arduino);
+  cymbal_right_tone = new FootTone(score.HAND_CLAP, 11, 1, cymbal_arduino);
+  
+  tom_tone = new TomTone(score.LOW_TOM, score, conga_arduino);
+  
+  cabasa_tone = new CabasaTone(score.CABASA, score, conga_arduino);
+  hi_hat_tone = new HiHatTone(score.HIHAT, score, conga_arduino);
+  
   
   //conga_tone.dynamicGenNotes();
   //cabasa_tone.dynamicGenNotes();  
@@ -104,11 +121,8 @@ void draw() {
   background(color(4, 79, 111));
   // draw using a white stroke
   stroke(color(84, 145, 158));
- 
-  int left_val = arduino.analogRead(LEFT_FORCE_SENSOR_PIN);
-  int right_val = arduino.analogRead(RIGHT_FORCE_SENSOR_PIN);
-  
-  //conga_tone.isOn()
+
+  //Check conga_tone
   if (conga_tone.isOn()) {
     if (!conga_tone.isBooted()) {
     //Status: Sleeping
@@ -116,13 +130,13 @@ void draw() {
       if (playing == false) {
         conga_tone.dynamicGenNotes();
         score.addCallback(8, 0);
-        score.play();
-        playing = true;
+        //playing = true;
       }
-      conga_tone.boot(left_foot_tone, right_foot_tone);
+      conga_tone.boot(conga_left_tone, conga_right_tone);
     } else {
     //Status: Booted
       if (playing == false) {
+        println("2");
         score.play();
         playing = true;
       }
@@ -132,33 +146,47 @@ void draw() {
     if (conga_tone.isBooted()) {
       conga_tone.shutdown();
     }
+  }
+  
+  //Check cymbal_tone
+  if (cymbal_tone.isOn()) {
+    println("cymbal_tone");
+    if (!cymbal_tone.isBooted()) {
+    //Status: Sleeping
+      //TODO dhynammic add instrument in callback
+      if (playing == false) {
+        cymbal_tone.dynamicGenNotes();
+        score.addCallback(8, 0);
+        //score.play();
+        //playing = true;
+      }
+      cymbal_tone.boot(cymbal_left_tone, cymbal_right_tone);
+    } else {
+    //Status: Booted
+      if (playing == false) {
+        score.play();
+        playing = true;
+      }
+      cymbal_tone.lightOn();
+    }
+  } else {
+    if (cymbal_tone.isBooted()) {
+      cymbal_tone.shutdown();
+    }
+  }
+  
+  if (!conga_tone.isOn() && !cymbal_tone.isOn()) {
     score.stop();
     score.empty();
     playing = false;
   }
-
-  if (left_val > force_sensor_min_threshold) {
-      left_foot_tone.update(forceToDynamic(left_val));
-      left_foot_tone.play();
-      left_foot_tone.lightOn();
-      left_foot_tone.lock();
-  } else {
-    left_foot_tone.update(0);
-    left_foot_tone.lightOff();
-    left_foot_tone.unlock();
-  }
   
-  if (right_val > force_sensor_min_threshold) {
-    right_foot_tone.update(forceToDynamic(right_val));
-    right_foot_tone.play();
-    right_foot_tone.lightOn();
-    right_foot_tone.lock();
-  } else {
-    right_foot_tone.update(0);
-    right_foot_tone.lightOff();
-    right_foot_tone.unlock();
-  }
-  println(left_val + ": " + right_val + ": " + conga_tone.isOn() + " is_booted: " + conga_tone.isBooted());
+  checkFootTone(conga_left_tone);
+  checkFootTone(conga_right_tone);
+  checkFootTone(cymbal_left_tone);
+  checkFootTone(cymbal_right_tone);
+  
+  //println(conga_left_tone.getForeceVal() + ": " + conga_right_tone.getForeceVal() + ": " + conga_tone.isOn() + " is_booted: " + conga_tone.isBooted());
   
   //Buttons for controlling
   for (int i = 0; i < 2 ; i++) {
@@ -177,24 +205,34 @@ float forceToDynamic(int force) {
   return map(force, force_sensor_min_threshold, force_sensor_max_threshold, foot_tone_volume_min_threshold, 120);
 }
 
+void checkFootTone(FootTone foot_tone) {
+  int val = foot_tone.getForeceVal();
+  if (val > force_sensor_min_threshold) {
+    foot_tone.update(forceToDynamic(val));
+    foot_tone.play();
+    foot_tone.lightOn();
+    foot_tone.lock();
+  } else {
+    foot_tone.update(0);
+    foot_tone.lightOff();
+    foot_tone.unlock();
+  }
+}
+
 void handleCallbacks(int callbackID) {
   println("callback");
   score.stop();
   score.empty();
-  conga_tone.dynamicGenNotes();
-  cabasa_tone.dynamicGenNotes();  
-  //cymbal_tone.dynamicGenNotes();
-  
+  if (conga_tone.isBooted()) {
+    conga_tone.dynamicGenNotes();
+  }
+  //cabasa_tone.dynamicGenNotes(); 
+  if (cymbal_tone.isBooted()) {
+    cymbal_tone.dynamicGenNotes();
+  }
   score.addCallback(8, 0);
   playing = false;
   //score.play();
-  //zabu_tone1.dynamicGenNotes();
-  /*
-  switch (callbackID) {
-    case 11:
-      left_foot_tone.score.stop();
-  }
-  */
   //score.update();
 }
 
