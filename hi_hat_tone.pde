@@ -6,8 +6,8 @@ class HiHatTone extends ZabuTone {
     super(pt, score);
   }
   
-  HiHatTone(float pt, SCScore score, Arduino ard) {
-    super(pt, score, ard);
+  HiHatTone(float pt, float dm, SCScore score, Arduino ard) {
+    super(pt, dm, score, ard);
   }
   
   HiHatTone(float dt, float dm, float pt, SCScore score) {

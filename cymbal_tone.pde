@@ -6,8 +6,8 @@ class CymbalTone extends ZabuTone {
     super(pt, score);
   }
   
-  CymbalTone(float pt, SCScore score, Arduino ard) {
-    super(pt, score, ard);
+  CymbalTone(float pt, float dm, SCScore score, Arduino ard) {
+    super(pt, dm, score, ard);
   }
   
   CymbalTone(float dt, float dm, float pt, SCScore score) {

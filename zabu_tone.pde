@@ -29,6 +29,12 @@ class ZabuTone extends Tone {
     arduino = ard;
   }
   
+  ZabuTone(float pt, float dm, SCScore score, Arduino ard) {
+    super(pt, score);
+    dynamic = dm;
+    arduino = ard;
+  }
+  
   ZabuTone(float pt, float dt, float dm, Arduino ard) {
     super(pt, dt, dm);
   }

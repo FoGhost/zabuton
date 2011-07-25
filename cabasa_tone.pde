@@ -6,8 +6,8 @@ class CabasaTone extends ZabuTone {
     super(pt, score);
   }
   
-  CabasaTone(float pt, SCScore score, Arduino ard) {
-    super(pt, score, ard);
+  CabasaTone(float pt, float dm, SCScore score, Arduino ard) {
+    super(pt, dm, score, ard);
   }
   
   CabasaTone(float dt, float dm, float pt, SCScore score) {
@@ -19,13 +19,17 @@ class CabasaTone extends ZabuTone {
       //Simple one
       for (float i=0; i< 16; i++) {
         if (i%9 == 0 || i%15 == 0) {
-          score.addNote(i * 0.5, 9, 0, pitch, 40, 0.5, 0.8, 64);
+          if ((dynamic + 20) < 128) {
+            score.addNote(i * 0.5, 9, 0, pitch, dynamic + 20, 0.5, 0.8, 64);
+          } else {
+            score.addNote(i * 0.5, 9, 0, pitch, 127, 0.5, 0.8, 64);
+          }
         } else if (i%4 !=0) {
           float rd = random(10);
           if (i%3 == 0) {
-           score.addNote(i * 0.5, 9, 0, pitch, 20, 0.25, 0.8, 64);
+           score.addNote(i * 0.5, 9, 0, pitch, dynamic, 0.25, 0.8, 64);
           } else {
-           score.addNote(i * 0.5, 9, 0, pitch, 10, 0.25, 0.8, 64);
+           score.addNote(i * 0.5, 9, 0, pitch, dynamic - 10, 0.25, 0.8, 64);
           }
         }
       }

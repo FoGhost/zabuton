@@ -6,7 +6,8 @@ class FootTone extends Tone {
   Arduino arduino;
   int led_pin = 10;
   int force_pin = 0;
-  
+  //dynamic coefficient
+  float dynamic_coeff = 1;
   int led_val = 0;
   
   FootTone() {
@@ -17,8 +18,9 @@ class FootTone extends Tone {
     super(pt);
   }
   
-  FootTone(float pt, int led, int fc_pin, Arduino ard) {
+  FootTone(float pt, float dm_coeff, int led, int fc_pin, Arduino ard) {
     super(pt);
+    dynamic_coeff = dm_coeff;
     led_pin = led;
     force_pin = fc_pin;
     arduino = ard;
@@ -63,7 +65,7 @@ class FootTone extends Tone {
   
   void play() {
     if (playable) {
-      sound_cipher.playNote(starBeat, channel, instrument, pitch, dynamic, duration, articulation, pan);
+      sound_cipher.playNote(starBeat, channel, instrument, pitch, dynamic * dynamic_coeff, duration, articulation, pan);
       beat_count += duration;
     }
   }

@@ -6,8 +6,8 @@ class CongaTone extends ZabuTone {
     super(pt, score);
   }
   
-  CongaTone(float pt, SCScore score, Arduino ard) {
-    super(pt, score, ard);
+  CongaTone(float pt, float dm, SCScore score, Arduino ard) {
+    super(pt, dm, score, ard);
   }
   
   CongaTone(float dt, float dm, float pt, SCScore score) {
@@ -15,18 +15,24 @@ class CongaTone extends ZabuTone {
   }
   
   void dynamicGenNotes() {
+    println("Simple");
     //Simple One
     if (rhythm_level == 0) {
       for (float i=0; i< 16; i++) {
         if (i%8 < 2) {
-          score.addNote(i * 0.5, 9, 0, pitch, 70, 0.25, 0.8, 64);
+          score.addNote(i * 0.5, 9, 0, pitch, dynamic, 0.25, 0.8, 64);
         } else if (i%8 < 4) {
-          score.addNote(i * 0.5, 9, 0, pitch, 35, 0.25, 0.8, 64);
+          score.addNote(i * 0.5, 9, 0, pitch, dynamic - 40, 0.25, 0.8, 64);
         } else if (i%8 < 7) {
-          score.addNote(i * 0.5, 9, 0, pitch, 110, 0.25, 0.8, 64);
+          if ((dynamic + 30) < 128) {
+            score.addNote(i * 0.5, 9, 0, pitch, dynamic + 30, 0.25, 0.8, 64);
+          } else {
+            score.addNote(i * 0.5, 9, 0, pitch, 127, 0.25, 0.8, 64);
+          }
         }
       }
     } else  if (rhythm_level == 1) {
+      println("Complex");
       //Complex one
       for (float i=0; i< 16; i++) {
         if (i%8 == 0 || i%16 == 14) {

@@ -82,18 +82,18 @@ void setup() {
   */
   
   //Initialized tone sets
-  conga_tone = new CongaTone(score.HIGH_TOM, score, conga_arduino);
-  conga_left_tone = new FootTone(score.ACOUSTIC_SNARE, 10, 0, conga_arduino);
-  conga_right_tone = new FootTone(score.CRASH, 11, 1, conga_arduino);
+  conga_tone = new CongaTone(score.HIGH_TOM, 70, score, conga_arduino);
+  conga_left_tone = new FootTone(score.ACOUSTIC_SNARE, 0.6, 10, 0, conga_arduino);
+  conga_right_tone = new FootTone(score.CRASH, 1.0, 11, 1, conga_arduino);
   
-  cymbal_tone = new CymbalTone(score.CABASA, score, cymbal_arduino);
-  cymbal_left_tone = new FootTone(score.LOW_CONGA, 10, 0, cymbal_arduino);
-  cymbal_right_tone = new FootTone(score.HAND_CLAP, 11, 1, cymbal_arduino);
+  cymbal_tone = new CymbalTone(score.CABASA, 20, score, cymbal_arduino);
+  cymbal_left_tone = new FootTone(score.LOW_CONGA, 1.0, 10, 0, cymbal_arduino);
+  cymbal_right_tone = new FootTone(score.HAND_CLAP, 1.0, 11, 1, cymbal_arduino);
   
-  tom_tone = new TomTone(score.LOW_TOM, score, conga_arduino);
+  tom_tone = new TomTone(score.LOW_TOM, 70, score, conga_arduino);
   
-  cabasa_tone = new CabasaTone(score.CABASA, score, conga_arduino);
-  hi_hat_tone = new HiHatTone(score.HIHAT, score, conga_arduino);
+  cabasa_tone = new CabasaTone(score.CABASA, 70, score, conga_arduino);
+  hi_hat_tone = new HiHatTone(score.HIHAT, 70, score, conga_arduino);
   
   
   //conga_tone.dynamicGenNotes();
@@ -186,7 +186,7 @@ void draw() {
   checkFootTone(cymbal_left_tone);
   checkFootTone(cymbal_right_tone);
   
-  //println(conga_left_tone.getForeceVal() + ": " + conga_right_tone.getForeceVal() + ": " + conga_tone.isOn() + " is_booted: " + conga_tone.isBooted());
+  println(conga_left_tone.getForeceVal() + ": " + conga_right_tone.getForeceVal() + ": " + conga_tone.isOn() + " is_booted: " + conga_tone.isBooted());
   
   //Buttons for controlling
   for (int i = 0; i < 2 ; i++) {
@@ -202,7 +202,7 @@ void draw() {
 }
 
 float forceToDynamic(int force) {
-  return map(force, force_sensor_min_threshold, force_sensor_max_threshold, foot_tone_volume_min_threshold, 120);
+  return map(force, force_sensor_min_threshold, force_sensor_max_threshold, foot_tone_volume_min_threshold, 127);
 }
 
 void checkFootTone(FootTone foot_tone) {

@@ -6,8 +6,8 @@ class TomTone extends ZabuTone {
     super(pt, score);
   }
   
-  TomTone(float pt, SCScore score, Arduino ard) {
-    super(pt, score, ard);
+  TomTone(float pt, float dm, SCScore score, Arduino ard) {
+    super(pt, dm, score, ard);
   }
   
   TomTone(float dt, float dm, float pt, SCScore score) {
